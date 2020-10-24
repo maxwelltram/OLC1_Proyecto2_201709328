@@ -1,0 +1,68 @@
+<!DOCTYPE html5>
+
+<html>
+<header>
+    <link rel="stylesheet" href="Estilos.css">
+    <nav id="menu">
+        <ul>
+            <li><a href="#">Menú</a>
+                <ul>
+                    <li><a href="#">Abrir</a></li>
+                    <li><a href="#">Nuevo</a></li>
+                    <li><a href="#">Guardar</a></li>
+                    <li><a href="#">Guardar Como</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Descargar</a>
+                <ul>
+                    <li><a href="#">Ambos Archivos</a></li>
+                    <li><a href="#">Javascript</a></li>
+                    <li><a href="#">Python</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<head>
+    <title>
+        [OLC1]Proyecto2
+    </title>
+    <script src="codemirror/codemirror/lib/codemirror.js"></script>
+    <link href="codemirror/codemirror/lib/codemirror.css" rel="stylesheet" />
+    <script src="codemirror/codemirror/mode/javascript/javascript.js"></script>
+    <link href="codemirror/codemirror/theme/dracula.css" rel="stylesheet" />
+</head>
+
+<body>
+    <br>
+    <br>
+    <br>
+    <br>
+    <button class=btb>201709328</button>
+    <br>
+    <div class=textBase>
+
+        <textarea id="editor"></textarea>
+        <script>
+            var editor = CodeMirror.fromTextArea
+                (document.getElementById('editor'), {
+                    mode: "javascript",
+                    theme: "dracula",
+                    lineNumbers: true
+                });
+        </script>
+
+    </div>
+
+    <div class=tex1>
+        <textarea class=text1>Java</textarea>
+    </div>
+    <br>
+    <div class=tex2>
+        <textarea class=text2>Python</textarea>
+    </div>
+
+</body>
+
+</html>
