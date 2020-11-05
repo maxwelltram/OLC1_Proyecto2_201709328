@@ -1,0 +1,194 @@
+
+/*================================LEXICO=============================*/
+
+/* lexical grammar */
+%lex
+%options case-insensitive
+%%
+
+"//".*				%{return 'Tk_comentario'; %} 	
+[/][*][^*]*[*]+([^/*][^*]*[*]+)*[/]	%{return 'Tk_comentario'; %} 
+
+"++"    %{return 'tk_adicion'; %} 
+"--"    %{return 'tk_sustraccion'; %}
+"+"     %{return 'tk_mas'; %} 
+"-"     %{return 'tk_menos'; %} 
+"*"     %{return 'tk_multiplicacion'; %} 
+"/"     %{return 'tk_diagonal'; %}  
+":"     %{return 'tk_dosPuntos'; %}
+";"     %{return 'tk_PuntoYComa'; %} 
+"."     %{return 'tk_Punto'; %} 
+","     %{return 'tk_coma'; %}
+">="    %{return 'tk_mayorOigual'; %} 
+"<="    %{return 'tk_menorOigual'; %}
+"=="    %{return 'tk_dobleIgual'; %}
+"="     %{return 'tk_igual'; %}  
+"!="    %{return 'tk_diferenteDe'; %} 
+"<"     %{return 'tk_menorQue'; %} 
+">"     %{return 'tk_mayorQue'; %}  
+"\\"     %{return 'tk_diagonalInvertida'; %} 
+"^"     %{return 'tk_Potencia';%}
+"&&"    %{return 'tk_And';%}
+"||"	%{return 'tk_Or';%}
+"!"     %{return 'tk_not';%}
+
+[0-9]+\b              %{  return 'tk_entero';  %}
+[0-9]+("."[0-9]+)?\b     %{  return 'tk_decimal'; %}
+
+"default"           %{  return 'tk_default'; %}
+"static"            %{  return 'tk_static'; %}
+"BREAK"             %{  return 'tk_break';   %}
+"CONTINUE"             %{  return 'tk_continue';   %}
+"RETURN"             %{  return 'tk_return';   %}
+"MAIN"             %{  return 'tk_main';   %}
+"ARGS"             %{  return 'tk_args';   %}
+"PUBLIC"             %{  return 'tk_public';   %}
+"PRIVATE"             %{  return 'tk_private';   %}
+"SWITCH"              %{ return 'tk_switch';    %}
+"CASE"                  %{return 'tk_case';     %}
+"VOID"             %{  return 'tk_void';   %}
+"SYSTEM"             %{  return 'tk_system';   %}
+"OUT"             %{  return 'tk_out';   %}
+"PRINTLN"             %{  return 'tk_println';   %}
+"PRINT"             %{  return 'tk_print';   %}
+"INTERFACE"             %{  return 'tk_interface';   %}
+"class"             %{  return 'tk_class';   %}
+"FOR"             %{  return 'tk_for';   %}
+"IF"             %{  return 'tk_if';   %}
+"ELSE"             %{  return 'tk_else';   %}
+"WHILE"             %{  return 'tk_while';   %}
+"DO"             %{  return 'tk_do';   %}
+"DOUBLE"        %{return 'tk_double';%}
+"INT"             %{  return 'tk_int';   %}
+"BOOLEAN"             %{  return 'tk_boolean';   %}
+"FLOAT"             %{  return 'tk_float';   %}
+"STRING"             %{  return 'tk_string';   %}
+"CHAR"             %{  return 'tk_char';   %}
+"TRUE"             %{  return 'tk_true';   %}
+"FALSE"             %{  return 'tk_false';   %}
+
+")"    %{return 'tk_ParentesisC';%} 
+"("    %{return 'tk_ParentesisA';%} 
+"["    %{return 'tk_CorcheteA';%} 
+"]"    %{return 'tk_CorcheteC';%} 
+"{"    %{return 'tk_LlaveA';%}  
+"}"     %{return 'tk_LlaveC';%}
+
+
+\"[^\"]*\"	        {return 'tk_cadena';}
+"'"[^']"'"		{return 'tk_caracter';} 
+([a-zA-Z])[a-zA-Z0-9_]*	{return 'tk_identificador';}
+
+[ \t\r\n\f]+         { /*se ignoran*/ }
+
+<<EOF>>               return 'EOF';
+.					{ 
+                        console.log('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column);
+                        
+                    }
+/lex
+
+
+/*================================SINTACTICO=============================*/
+
+%left 'tk_Or'
+%left 'tk_And'
+%left 'tk_dobleIgual' 'tk_diferenteDe'
+%left 'tk_mayorQue' 'tk_menorQue' 'tk_menorOigual' 'tk_mayorOigual'
+%left 'tk_mas' 'tk_menos'
+%right 'tk_adicion' 'tk_sustraccion' 'tk_Potencia'
+%left 'tk_coma'
+%left 'tk_multiplicacion' 'tk_diagonal'
+%right 'tk_menos' 'UNOT'
+
+%start INICIO
+
+%% 
+
+INICIO: INSTRUCCIONES EOF;
+
+
+
+
+INSTRUCCIONES:  INSTRUCCIONES INSTRUCCION
+                |INSTRUCCION ;
+                
+INSTRUCCION: DECLARACION tk_PuntoYComa
+        | IMPRIMIR tk_PuntoYComa
+        | ASIGNACION tk_PuntoYComa
+        | IF    
+        | WHILE 
+        | FOR   
+        | DO    tk_PuntoYComa
+        | COMENTARIO
+        | CLASE 
+        | LLAMAMETODO
+        | error tk_PuntoYComa {console.log('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column);};
+
+
+
+DECLARACION: TIPO tk_identificador tk_igual EXPRESION;
+
+TIPO: tk_int
+        | tk_double
+        | tk_boolean
+        | tk_char;
+
+ASIGNACION: tk_identificador tk_igual EXPRESION;
+
+IF:     tk_if   tk_ParentesisA  EXPRESION       tk_ParentesisC  SENTENCIAS
+        | tk_if   tk_ParentesisA  EXPRESION       tk_ParentesisC  SENTENCIAS      tk_else SENTENCIAS;
+
+WHILE:  tk_while        tk_ParentesisA  EXPRESION       tk_ParentesisC  SENTENCIAS;
+
+FOR: tk_for tk_ParentesisA      DECLARACION     EXPRESION       EXPRESION       tk_ParentesisC SENTENCIAS;
+
+DO:     tk_do   SENTENCIAS WHILE;
+
+COMENTARIO: Tk_comentario;
+
+IMPRIMIR: tk_system tk_Punto    tk_out tk_Punto  IMPRIMIRPRIMA   CONTENIDO;
+
+IMPRIMIRPRIMA: tk_print
+        |tk_println;
+
+LLAMAMETODO: tk_identificador tk_ParentesisA EXPRESION tk_ParentesisC;
+
+CONTENIDO:tk_ParentesisA      tk_cadena         tk_ParentesisC;
+
+CLASE: ACCESO CLAIN tk_id SENTENCIAS
+        | ACCESO tk_static tk_void tk_main tk_ParentesisA tk_string tk_CorcheteA tk_CorcheteC tk_args tk_ParentesisC SENTENCIAS;
+
+ACCESO: tk_public
+        | tk_private;
+
+CLAIN: tk_class
+        |tk_interface;
+
+METODO: tk_public TIPO tk_identificador tk_ParentesisA  DECLARACION tk_ParentesisC SENTENCIAS;
+
+SENTENCIAS: tk_LlaveA   INSTRUCCIONES   tk_LlaveC;
+
+EXPRESION: EXPRESION tk_diagonal EXPRESION
+        | EXPRESION tk_multiplicacion EXPRESION
+        | EXPRESION tk_menos EXPRESION
+        | EXPRESION tk_mas EXPRESION
+        | tk_entero
+        | tk_decimal
+        | tk_identificador
+        | tk_float
+        | tk_false
+        | tk_true
+        | EXPRESION tk_dobleIgual EXPRESION
+        | EXPRESION tk_diferenteDe EXPRESION
+        | EXPRESION tk_menorQue EXPRESION
+        | EXPRESION tk_mayorQue EXPRESION
+        | EXPRESION tk_menorOigual EXPRESION
+        | EXPRESION tk_mayorOigual EXPRESION
+        | EXPRESION tk_And EXPRESION
+        | EXPRESION tk_Or EXPRESION
+        | EXPRESION tk_Potencia EXPRESION
+        | EXPRESION tk_coma EXPRESION
+        | EXPRESION tk_sustraccion EXPRESION
+        | EXPRESION tk_adicion EXPRESION
+;

@@ -1,0 +1,5 @@
+publ$ic class Hola {
+    public static void main(String[] args) {
+int x=6;
+    } 
+}
