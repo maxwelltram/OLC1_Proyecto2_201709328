@@ -1,6 +1,9 @@
 
 /*================================LEXICO=============================*/
-
+%{
+    let Nodo=require('./nodo_arbol');
+    let tbl_error="";
+%}
 /* lexical grammar */
 %lex
 %options case-insensitive
